@@ -1,32 +1,64 @@
-import NextAuth from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import NextAuth from "next-auth";
 
-import authConfig from "./auth.config"
+import authConfig from "./auth.config";
 import { db } from "./lib/db";
-import { getAccountByUserId, getUserById } from "@/features/auth/actions";
+import { getUserById } from "@/features/auth/actions";
 
- 
-
- 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
-    // No custom signIn callback needed here. The PrismaAdapter already
-    // handles creating new users and linking/looking up OAuth accounts
-    // automatically on every sign-in. A hand-rolled version of that logic
-    // duplicates the adapter's job and (worse) silently auto-links accounts
-    // by email without the provider having verified that email - which is
-    // the exact security hole Auth.js's own "OAuthAccountNotLinked" check
-    // exists to prevent. If you need to gate who's allowed to sign in, add
-    // a `signIn({ user, account })` callback that only returns true/false -
-    // don't write to the DB inside it.
+    async signIn({ user, account }) {
+      if (!user.email) return false;
 
-    async jwt({ token, user, account }) {
-      if(!token.sub) return token;
-      const existingUser = await getUserById(token.sub)
+      // Find existing user
+      let existingUser = await db.user.findUnique({
+        where: {
+          email: user.email,
+        },
+      });
 
-      if(!existingUser) return token;
+      // Create user if first login
+      if (!existingUser) {
+        existingUser = await db.user.create({
+          data: {
+            email: user.email,
+            name: user.name,
+            image: user.image,
+          },
+        });
+      }
 
-      const exisitingAccount = await getAccountByUserId(existingUser.id);
+      // Link OAuth account if not already linked
+      if (account) {
+        const existingAccount = await db.account.findUnique({
+          where: {
+            provider_providerAccountId: {
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+            },
+          },
+        });
+
+        if (!existingAccount) {
+          await db.account.create({
+            data: {
+              userId: existingUser.id,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              type: account.type,
+            },
+          });
+        }
+      }
+
+      return true;
+    },
+
+    async jwt({ token }) {
+      if (!token.sub) return token;
+
+      const existingUser = await getUserById(token.sub);
+
+      if (!existingUser) return token;
 
       token.name = existingUser.name;
       token.email = existingUser.email;
@@ -36,21 +68,25 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     },
 
     async session({ session, token }) {
-      // Attach the user ID from the token to the session
-    if(token.sub  && session.user){
-      session.user.id = token.sub
-    } 
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+      }
 
-    if(token.sub && session.user){
-      session.user.role = token.role
-    }
+      if (session.user) {
+        session.user.role = token.role;
+      }
 
-    return session;
+      return session;
     },
   },
-  
+
   secret: process.env.AUTH_SECRET,
-  adapter: PrismaAdapter(db),
-  session: { strategy: "jwt" },
+
+
+
+  session: {
+    strategy: "jwt",
+  },
+
   ...authConfig,
-})
+});
