@@ -57,39 +57,45 @@ const lucideIconMap: Record<string, LucideIcon> = {
   // Add any other icons you might use dynamically
 }
 
-export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundData: PlaygroundData[] }) {
+export function DashboardSidebar({ 
+  initialPlaygroundData = [] 
+}: { 
+  initialPlaygroundData?: PlaygroundData[] 
+}) {
   const pathname = usePathname()
-  const [starredPlaygrounds, setStarredPlaygrounds] = useState(initialPlaygroundData.filter((p) => p.starred))
+  
+  // Safe initialization with fallbacks
+  const [starredPlaygrounds, setStarredPlaygrounds] = useState(
+    (initialPlaygroundData ?? []).filter((p) => p.starred)
+  )
   const [recentPlaygrounds, setRecentPlaygrounds] = useState(initialPlaygroundData)
 
   return (
     <Sidebar variant="inset" collapsible="icon" className="border-1 border-r">
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-3 justify-center">
-          <Image src={"/logo.svg"} alt="logo" height={200} width={200} />
+          <Image src={"/logo.svg"} alt="logo" height={60} width={60} />
         </div>
-       
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive={pathname === "/"} tooltip="Home" className="w-full">
-                <Link href="/" className="flex items-center gap-2">
+              <Link href="/">
+                <SidebarMenuButton isActive={pathname === "/"} tooltip="Home">
                   <Home className="h-4 w-4" />
                   <span>Home</span>
-                </Link>
-              </SidebarMenuButton>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive={pathname === "/dashboard"} tooltip="Dashboard" className="w-full">
-                <Link href="/dashboard" className="flex items-center gap-2">
+              <Link href="/dashboard">
+                <SidebarMenuButton isActive={pathname === "/dashboard"} tooltip="Dashboard">
                   <LayoutDashboard className="h-4 w-4" />
                   <span>Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
-          
           </SidebarMenu>
         </SidebarGroup>
 
@@ -103,7 +109,6 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
           </SidebarGroupAction>
           <SidebarGroupContent>
             <SidebarMenu>
-
               {starredPlaygrounds.length === 0 && recentPlaygrounds.length === 0 ? (
                 <div className="text-center text-muted-foreground py-4 w-full">Create your playground</div>
               ) : (
@@ -114,9 +119,8 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
                       <SidebarMenuButton
                         isActive={pathname === `/playground/${playground.id}`}
                         tooltip={playground.name}
-                        className="w-full"
                       >
-                        <Link href={`/playground/${playground.id}`} className="flex items-center gap-2">
+                        <Link href={`/playground/${playground.id}`}>
                           {IconComponent && <IconComponent className="h-4 w-4" />}
                           <span>{playground.name}</span>
                         </Link>
@@ -147,9 +151,8 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
                       <SidebarMenuButton
                         isActive={pathname === `/playground/${playground.id}`}
                         tooltip={playground.name}
-                        className="w-full"
                       >
-                        <Link href={`/playground/${playground.id}`} className="flex items-center gap-2">
+                        <Link href={`/playground/${playground.id}`}>
                           {IconComponent && <IconComponent className="h-4 w-4" />}
                           <span>{playground.name}</span>
                         </Link>
@@ -159,8 +162,8 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
                 })
               )}
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="View all" className="w-full">
-                  <Link href="/playgrounds" className="flex items-center gap-2">
+                <SidebarMenuButton tooltip="View all">
+                  <Link href="/playgrounds">
                     <span className="text-sm text-muted-foreground">View all playgrounds</span>
                   </Link>
                 </SidebarMenuButton>
@@ -172,8 +175,8 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Settings" className="w-full">
-              <Link href="/settings" className="flex items-center gap-2">
+            <SidebarMenuButton tooltip="Settings">
+              <Link href="/settings">
                 <Settings className="h-4 w-4" />
                 <span>Settings</span>
               </Link>

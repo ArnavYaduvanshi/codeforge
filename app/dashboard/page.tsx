@@ -1,6 +1,8 @@
 import AddNewButton from "@/features/dashboard/components/add-new-btn";
 import AddRepo from "@/features/dashboard/components/add-repo";
 import React from "react";
+import ProjectTable from "@/features/dashboard/components/project-table";
+import { deleteProjectById, editProjectById, duplicateProjectById } from "@/features/dashboard/actions";
 const EmptyState = () => (
   <div className="flex flex-col items-center justify-center py-16">
     <img src="/empty-state.svg" alt="No projects" className="w-48 h-48 mb-4" />
@@ -9,12 +11,26 @@ const EmptyState = () => (
   </div>
 );
 const DashboardPage = () => {
+  const playgrounds: any[] = [];
+
   return (
     <div className="flex flex-col items-center justify-start min-h-screen mx-auto
     max-w-7xl px-4 py-10">
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 w-full'>
         <AddNewButton />
         <AddRepo/>
+      </div>
+        <div className="mt-10 flex flex-col justify-center items-center w-full">
+        {playgrounds.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <ProjectTable
+            projects={playgrounds}
+            onDeleteProject={deleteProjectById}
+            onUpdateProject={editProjectById}
+            onDuplicateProject={async (id: string) => { await duplicateProjectById(id); }}
+          />
+        )}
       </div>
     </div>
   );

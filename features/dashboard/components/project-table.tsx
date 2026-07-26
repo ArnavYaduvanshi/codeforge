@@ -237,10 +237,10 @@ export default function ProjectTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem>
-                        <MarkedToggleButton
+                        {<MarkedToggleButton
                           markedForRevision={project.Starmark[0]?.isMarked}
                           id={project.id}
-                        />
+                        /> }
                       </DropdownMenuItem>
                       <DropdownMenuItem>
                         <Link
