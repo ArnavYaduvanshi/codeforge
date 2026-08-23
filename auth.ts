@@ -9,14 +9,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     async signIn({ user, account }) {
       if (!user.email) return false;
 
-      // Find existing user
       let existingUser = await db.user.findUnique({
-        where: {
-          email: user.email,
-        },
+        where: { email: user.email },
       });
 
-      // Create user if first login
       if (!existingUser) {
         existingUser = await db.user.create({
           data: {
@@ -27,7 +23,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         });
       }
 
-      // Link OAuth account if not already linked
       if (account) {
         const existingAccount = await db.account.findUnique({
           where: {
@@ -53,16 +48,26 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return true;
     },
 
-    async jwt({ token }) {
+    async jwt({ token, user }) {
+      if (user?.email) {
+        const dbUser = await db.user.findUnique({ where: { email: user.email } });
+        if (dbUser) {
+          token.sub = dbUser.id;
+          token.name = dbUser.name;
+          token.email = dbUser.email;
+          token.role = dbUser.role;
+        }
+        return token;
+      }
+
       if (!token.sub) return token;
 
       const existingUser = await getUserById(token.sub);
-
-      if (!existingUser) return token;
-
-      token.name = existingUser.name;
-      token.email = existingUser.email;
-      token.role = existingUser.role;
+      if (existingUser) {
+        token.name = existingUser.name;
+        token.email = existingUser.email;
+        token.role = existingUser.role;
+      }
 
       return token;
     },
@@ -71,18 +76,14 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
-
       if (session.user) {
         session.user.role = token.role;
       }
-
       return session;
     },
-  },
+  }, // <-- closes `callbacks` — this was missing
 
   secret: process.env.AUTH_SECRET,
-
-
 
   session: {
     strategy: "jwt",

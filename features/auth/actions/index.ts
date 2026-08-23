@@ -1,6 +1,6 @@
 
 import { db } from "@/lib/db";
-
+import { auth } from "@/auth";
 
 export const getUserById = async (id:string)=>{
     try {
@@ -15,3 +15,8 @@ export const getUserById = async (id:string)=>{
     }
 }
 
+
+export const currentUser = async () => {
+  const session = await auth();
+  return session?.user;
+};

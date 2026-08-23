@@ -1,5 +1,5 @@
 "use server"
-import { currentUser } from "@/features/auth/actions/current-user";
+import { currentUser } from "@/features/auth/actions";
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache";
 export const getAllPlaygroundForUser = async ()=>{

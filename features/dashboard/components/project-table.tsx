@@ -218,7 +218,7 @@ export default function ProjectTable({
                     <div className="w-8 h-8 rounded-full overflow-hidden">
                       <Image
                         src={project.user.image || "/placeholder.svg"}
-                        alt={project.user.name}
+                        alt={project.user.name ?? "Project user"}
                         width={32}
                         height={32}
                         className="object-cover"
@@ -236,16 +236,17 @@ export default function ProjectTable({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem>
-                        {<MarkedToggleButton
+                      <DropdownMenuItem className="p-0 focus:bg-transparent">
+                        <MarkedToggleButton
                           markedForRevision={project.Starmark[0]?.isMarked}
                           id={project.id}
-                        /> }
+                          className="w-full justify-start rounded-md"
+                        />
                       </DropdownMenuItem>
                       <DropdownMenuItem>
                         <Link
                           href={`/playground/${project.id}`}
-                          className="flex items-center"
+                          className="flex items-center w-full"
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           Open Project
@@ -255,7 +256,7 @@ export default function ProjectTable({
                         <Link
                           href={`/playground/${project.id}`}
                           target="_blank"
-                          className="flex items-center"
+                          className="flex items-center w-full"
                         >
                           <ExternalLink className="h-4 w-4 mr-2" />
                           Open in New Tab

@@ -1,8 +1,10 @@
+export const dynamic = "force-dynamic";
 import AddNewButton from "@/features/dashboard/components/add-new-btn";
 import AddRepo from "@/features/dashboard/components/add-repo";
-import React from "react";
+
 import ProjectTable from "@/features/dashboard/components/project-table";
-import { deleteProjectById, editProjectById, duplicateProjectById } from "@/features/dashboard/actions";
+import { getAllPlaygroundForUser , deleteProjectById ,editProjectById , duplicateProjectById} from "@/features/playground/actions";
+
 const EmptyState = () => (
   <div className="flex flex-col items-center justify-center py-16">
     <img src="/empty-state.svg" alt="No projects" className="w-48 h-48 mb-4" />
@@ -10,29 +12,31 @@ const EmptyState = () => (
     <p className="text-gray-400">Create a new project to get started!</p>
   </div>
 );
-const DashboardPage = () => {
-  const playgrounds: any[] = [];
 
+const DashboardMainPage = async () => {
+  const playgrounds = await getAllPlaygroundForUser();
+  console.log(playgrounds);
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen mx-auto
-    max-w-7xl px-4 py-10">
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6 w-full'>
+    <div className="flex flex-col justify-start items-center min-h-screen mx-auto max-w-7xl px-4 py-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         <AddNewButton />
-        <AddRepo/>
+        <AddRepo />
       </div>
-        <div className="mt-10 flex flex-col justify-center items-center w-full">
-        {playgrounds.length === 0 ? (
+      <div className="mt-10 flex flex-col justify-center items-center w-full">
+        {playgrounds && playgrounds.length === 0 ? (
           <EmptyState />
         ) : (
+          // @ts-ignore
           <ProjectTable
-            projects={playgrounds}
+            projects={playgrounds || []}
             onDeleteProject={deleteProjectById}
             onUpdateProject={editProjectById}
-            onDuplicateProject={async (id: string) => { await duplicateProjectById(id); }}
+            //onDuplicateProject={duplicateProjectById}
           />
         )}
       </div>
     </div>
   );
-}
-export default DashboardPage;
+};
+
+export default DashboardMainPage;
