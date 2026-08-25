@@ -2,6 +2,7 @@
 import { currentUser } from "@/features/auth/actions";
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache";
+import { TemplateFolder } from "../libs/path-to-json";
 
 
 // Toggle marked status for a problem
@@ -171,4 +172,28 @@ export const duplicateProjectById = async (id: string) => {
     } catch (error) {
         console.error("Error duplicating project:", error);
     }
+};
+export const SaveUpdatedCode = async (playgroundId: string, data: TemplateFolder) => {
+  const user = await currentUser();
+  if (!user) return null;
+
+  try {
+    const updatedPlayground = await db.templateFile.upsert({
+      where: {
+        playgroundId, // now allowed since playgroundId is unique
+      },
+      update: {
+        content: JSON.stringify(data),
+      },
+      create: {
+        playgroundId,
+        content: JSON.stringify(data),
+      },
+    });
+
+    return updatedPlayground;
+  } catch (error) {
+    console.log("SaveUpdatedCode error:", error);
+    return null;
+  }
 };
