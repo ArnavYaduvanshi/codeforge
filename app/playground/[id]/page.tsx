@@ -6,6 +6,7 @@ import { usePlayground } from "@/features/playground/hooks/usePlayground";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip"; // or "@radix-ui/react-tooltip"
 import { TemplateFileTree } from "@/features/playground/components/playground-explorer";
+import { Files } from "lucide-react";
 
 const MainPlaygroundPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +19,10 @@ const MainPlaygroundPage = () => {
       </SidebarInset>
     );
   }
-  const activeFile = 'sample.txt'; // Replace with actual logic to determine the active file
+
+  // A TemplateFolder does not expose a `files` property. File selection is
+  // handled by the explorer, so there is no active file on initial render.
+  const activeFile = undefined;
 
   return (
     <TooltipProvider>
